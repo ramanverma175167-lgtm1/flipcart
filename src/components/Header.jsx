@@ -83,7 +83,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#f1f3f6] overflow-x-hidden">
+    <div className="w-full  bg-[#f1f3f6] overflow-x-hidden">
 
       {/* HEADER */}
       <header className="sticky top-0 z-30 bg-[#2874f0] shadow-md">
