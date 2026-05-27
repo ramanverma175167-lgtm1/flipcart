@@ -21,7 +21,7 @@ export default function ProductDetails() {
   const fetchProduct = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/products/${id}`
+        `https://flipcart-1-audl.onrender.com/api/products/${id}`
       );
 
       const data = await res.json();
