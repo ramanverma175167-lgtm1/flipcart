@@ -15,7 +15,7 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/products");
+        const res = await fetch("https://flipcart-1-audl.onrender.com/api/products");
         const data = await res.json();
 
         if (data.success) {
