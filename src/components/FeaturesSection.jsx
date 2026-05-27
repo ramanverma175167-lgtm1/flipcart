@@ -25,7 +25,7 @@ export default function FeaturesSection() {
   const fetchProducts = async () => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/products"
+        "https://flipcart-1-audl.onrender.com/api/products"
       );
 
       const data = await res.json();
@@ -139,17 +139,17 @@ export default function FeaturesSection() {
   // =========================
   // BUY NOW
   // =========================
-  const buyNow = (product) => {
-    localStorage.setItem(
-      "buyNowProduct",
-      JSON.stringify({
-        ...product,
-        qty: 1,
-      })
-    );
+const buyNow = (product) => {
+  localStorage.setItem(
+    "buyNowProduct",
+    JSON.stringify({
+      ...product,
+      qty: 1,
+    })
+  );
 
-    navigate("/order-summary");
-  };
+  navigate(`/product-details/${product._id}`); // ✅ FIXED
+};
 
   // =========================
   // LOADING

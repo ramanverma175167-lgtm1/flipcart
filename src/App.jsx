@@ -11,6 +11,7 @@ import Headersec from "./components/Headersecond";
 import Login from "./components/Login"
 import Myaccount from "./components/Myaccount"
 import Cart from "./components/Cart"
+import SearchPage from "./components/SearchPage"
 
 
 import Footer from "./components/Footer";
@@ -56,6 +57,16 @@ function App() {
     </>
   }
 />
+ <Route
+  path="/search"
+  element={
+    <>
+    <Headersec />
+      <SearchPage />
+    
+    </>
+  }
+/>
 
         {/* Public routes */}
         <Route
@@ -71,10 +82,15 @@ function App() {
 
         
 
-         <Route
-          path="/product-details/:id"
-          element={<ProductDetails />}
-        />
+       <Route
+  path="/product-details/:id"
+  element={
+    <>
+      <Headersec />
+      <ProductDetails />
+    </>
+  }
+/>
 
         <Route
           path="/order-summary"
@@ -96,16 +112,7 @@ function App() {
             </>
           }
         />
-        <Route
-          path="/Payment-details"
-          element={
-            <>
-              <Headersec />
-              <PaymentDetails />
-
-            </>
-          }
-        />
+       
        
         <Route
           path="/Login3"
