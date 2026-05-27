@@ -10,12 +10,16 @@ export default function SearchPage() {
     new URLSearchParams(location.search).get("q") || "";
 
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true); // ✅ ADD THIS
 
-  // FETCH + FILTER PRODUCTS
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("https://flipcart-1-audl.onrender.com/api/products");
+        setLoading(true); // start loading
+
+        const res = await fetch(
+          "https://flipcart-1-audl.onrender.com/api/products"
+        );
         const data = await res.json();
 
         if (data.success) {
@@ -33,17 +37,29 @@ export default function SearchPage() {
         }
       } catch (err) {
         console.log(err);
+      } finally {
+        setLoading(false); // stop loading
       }
     };
 
     if (query) fetchData();
   }, [query]);
 
-  // discount calculator
   const getDiscount = (price, oldPrice) => {
     if (!oldPrice || !price) return 0;
     return Math.round(((oldPrice - price) / oldPrice) * 100);
   };
+
+  // =========================
+  // LOADING UI
+  // =========================
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f1f3f6]">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f1f3f6] p-2 sm:p-4">
@@ -60,7 +76,7 @@ export default function SearchPage() {
       </div>
 
       {/* EMPTY STATE */}
-      {products.length === 0 ? (
+      {!loading && products.length === 0 ? (
         <div className="text-center mt-20 text-gray-500">
           No Products Found
         </div>
@@ -76,7 +92,7 @@ export default function SearchPage() {
                 onClick={() =>
                   navigate(`/product-details/${item._id}`)
                 }
-                className="bg-white rounded-xl shadow-sm flex gap-3 p-3 hover:shadow-md transition cursor-pointer active:scale-[0.99]"
+                className="bg-white rounded-xl shadow-sm flex gap-3 p-3 hover:shadow-md transition cursor-pointer"
               >
 
                 {/* IMAGE */}
@@ -91,31 +107,22 @@ export default function SearchPage() {
                 {/* DETAILS */}
                 <div className="flex-1">
 
-                  {/* TITLE */}
                   <h2 className="text-sm font-semibold text-gray-800 line-clamp-2">
                     {item.title}
                   </h2>
 
-                  {/* BRAND */}
                   <p className="text-xs text-gray-500 mt-1">
                     {item.brand}
                   </p>
 
-                  {/* ASSURED BADGE */}
+                  {/* ASSURED */}
                   <div className="flex items-center gap-1 mt-1 text-xs text-green-600 font-semibold">
-                    <FaShieldAlt className="text-green-600" />
-                    <span>Assured Product</span>
-                  </div>
-
-                  {/* RATING */}
-                  <div className="flex items-center gap-1 mt-1 text-xs text-yellow-500">
-                    <FaStar />
-                    <span>{item.rating || 4.2} ⭐</span>
+                    <FaShieldAlt />
+                    Assured Product
                   </div>
 
                   {/* PRICE */}
                   <div className="mt-2 flex items-center gap-2 flex-wrap">
-
                     <span className="text-base font-bold text-black">
                       ₹{item.price}
                     </span>
@@ -129,11 +136,10 @@ export default function SearchPage() {
                         {discount}% OFF
                       </span>
                     )}
-
                   </div>
 
-                  <p className="text-xs text-green-600 mt-1 font-medium">
-                    Free Delivery in 2-3 days
+                  <p className="text-xs text-green-600 mt-1">
+                    Free Delivery
                   </p>
 
                 </div>
