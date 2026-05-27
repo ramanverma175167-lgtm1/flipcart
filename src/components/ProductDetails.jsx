@@ -1,20 +1,44 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Slider from "react-slick";
+
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import "./ProductDetails.css";
 
-const images = [
-  "/iphone.jfif",
-  "/samsung.jfif",
-  "/realme.jfif",
-  "/vivo.jfif",
-];
+import "./ProductDetails.css";
 
 export default function ProductDetails() {
   const navigate = useNavigate();
+
+  // GET PRODUCT ID FROM URL
+  const { id } = useParams();
+
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // FETCH SINGLE PRODUCT
+  const fetchProduct = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/products/${id}`
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        setProduct(data.product);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchProduct();
+  }, [id]);
 
   const settings = {
     dots: true,
@@ -27,13 +51,30 @@ export default function ProductDetails() {
     arrows: false,
   };
 
+  if (loading) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="w-full h-screen flex justify-center items-center">
+        Product not found
+      </div>
+    );
+  }
+
   return (
     <div className="product-page">
 
       {/* TOP SLIDER */}
       <div className="slider-wrapper">
         <Slider {...settings}>
-          {images.map((img, index) => (
+
+          {product.images?.map((img, index) => (
             <div key={index}>
               <img
                 src={img}
@@ -42,6 +83,7 @@ export default function ProductDetails() {
               />
             </div>
           ))}
+
         </Slider>
       </div>
 
@@ -50,35 +92,47 @@ export default function ProductDetails() {
 
         {/* TITLE */}
         <h2 className="product-title">
-          Apple iPhone 15 Pro Max 256GB Natural Titanium
+          {product.title}
         </h2>
 
         {/* RATING */}
         <div className="rating-row">
-          <span className="rating">4.5 ★</span>
+
+          <span className="rating">
+            {product.rating || "4.5"} ★
+          </span>
 
           <span className="rating-text">
-            12,540 Ratings & 1,240 Reviews
+            {product.reviews || "0 Reviews"}
           </span>
+
         </div>
 
         {/* PRICE */}
         <div className="price-section">
-          <span className="offer">20% OFF</span>
 
-          <span className="price">₹42,000</span>
+          <span className="offer">
+            {product.discount || "OFF"}
+          </span>
 
-          <span className="old-price">₹52,000</span>
+          <span className="price">
+            ₹{product.price}
+          </span>
+
+          <span className="old-price">
+            ₹{product.oldPrice}
+          </span>
+
         </div>
 
         {/* DELIVERY */}
         <p className="delivery-text">
-          Free Delivery in 2 Days
+          {product.delivery || "Free Delivery"}
         </p>
 
         {/* STOCK */}
         <p className="stock-text">
-          Hurry, Only Few Left!
+          {product.stock || "In Stock"}
         </p>
 
         {/* SERVICE SECTION */}
@@ -113,37 +167,13 @@ export default function ProductDetails() {
 
           <h3>About this item</h3>
 
-          <div className="about-card">
+          <div
+            className="about-card"
+            dangerouslySetInnerHTML={{
+              __html: product.description || "",
+            }}
+          />
 
-            <p>
-              • 256 GB ROM with ultra fast performance
-            </p>
-
-            <p>
-              • 6.7 inch Super Retina XDR Display
-            </p>
-
-            <p>
-              • 48MP Triple Camera with Night Mode
-            </p>
-
-            <p>
-              • A17 Pro Chip for gaming & multitasking
-            </p>
-
-            <p>
-              • Long lasting battery backup
-            </p>
-
-            <p>
-              • Premium Titanium Body Design
-            </p>
-
-            <p>
-              • 1 Year Brand Warranty Included
-            </p>
-
-          </div>
         </div>
 
         {/* PRODUCT SPECIFICATIONS */}
@@ -153,31 +183,11 @@ export default function ProductDetails() {
 
           <div className="spec-row">
             <span className="spec-title">
-              Brand
-            </span>
-
-            <span className="spec-value">
-              Apple
-            </span>
-          </div>
-
-          <div className="spec-row">
-            <span className="spec-title">
-              Model Name
-            </span>
-
-            <span className="spec-value">
-              iPhone 15 Pro Max
-            </span>
-          </div>
-
-          <div className="spec-row">
-            <span className="spec-title">
               Storage
             </span>
 
             <span className="spec-value">
-              256 GB
+              {product.storage}
             </span>
           </div>
 
@@ -187,7 +197,7 @@ export default function ProductDetails() {
             </span>
 
             <span className="spec-value">
-              6.7 inch OLED
+              {product.display}
             </span>
           </div>
 
@@ -197,7 +207,7 @@ export default function ProductDetails() {
             </span>
 
             <span className="spec-value">
-              48MP + 12MP + 12MP
+              {product.camera}
             </span>
           </div>
 
@@ -207,7 +217,7 @@ export default function ProductDetails() {
             </span>
 
             <span className="spec-value">
-              4441 mAh
+              {product.battery}
             </span>
           </div>
 
@@ -217,7 +227,7 @@ export default function ProductDetails() {
             </span>
 
             <span className="spec-value">
-              A17 Pro Chip
+              {product.processor}
             </span>
           </div>
 
@@ -227,7 +237,7 @@ export default function ProductDetails() {
             </span>
 
             <span className="spec-value">
-              1 Year Manufacturer Warranty
+              {product.warranty}
             </span>
           </div>
 
@@ -239,7 +249,9 @@ export default function ProductDetails() {
           {/* ADD TO CART */}
           <button
             className="cart-btn"
-            onClick={() => navigate("/order-summary")}
+            onClick={() =>
+              navigate("/order-summary")
+            }
           >
             Add to Cart
           </button>
@@ -247,7 +259,9 @@ export default function ProductDetails() {
           {/* BUY NOW */}
           <button
             className="buy-btn"
-            onClick={() => navigate("/order-summary")}
+            onClick={() =>
+              navigate("/order-summary")
+            }
           >
             Buy Now
           </button>

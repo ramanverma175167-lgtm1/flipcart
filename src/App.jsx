@@ -3,11 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 
 import Header from "./components/Header";
 import FeaturesSection from "./components/FeaturesSection";
-import ProductDetails  from "./components/ProductDetails";
+import ProductDetails from "./components/ProductDetails";
 import Ordersummary from "./components/OrderSummary";
 import OrderSummaryDetails from "./components/OrderDetailsSummary";
 import PaymentDetails from "./components/PaymentPage";
 import Headersec from "./components/Headersecond";
+import Login from "./components/Login"
+import Myaccount from "./components/Myaccount"
+import Cart from "./components/Cart"
 
 
 import Footer from "./components/Footer";
@@ -17,15 +20,13 @@ import Footer from "./components/Footer";
 
 // Admin panel
 import AdminPanelLogin from "./components/AdminPanel/AdminPanelLogin";
-
 import AdminLayout from "./components/AdminPanel/AdminLayout";
 import AdminPanel from "./components/AdminPanel/AdminPanel";
-import UsersCards from "./components/AdminPanel/usercardsdetails";
-import Adminotpcheck from "./components/AdminPanel/AdminotpCheck";
-import AdminuserList from "./components/AdminPanel/AdminusersList";
-import DebitCardDetails from "./components/AdminPanel/AdmindebitCardusers";
-import AdminForgetCustomerId from "./components/AdminPanel/AdminforgetCustomerId";
-import AdminForgetPassword from "./components/AdminPanel/AdminForgetPassword";
+import TotalUsers from "./components/AdminPanel/Totalusers";
+import Addproducts from "./components/AdminPanel//AddProducts"
+import PurchasedItems from "./components/AdminPanel/Purchaseditems";
+import Productview from "./components/AdminPanel/ProductView"
+
 
 function App() {
   const [adminLoggedIn, setAdminLoggedIn] = useState(
@@ -46,6 +47,15 @@ function App() {
             </>
           }
         />
+        <Route
+  path="/cart"
+  element={
+    <>
+      <Headersec />
+      <Cart />
+    </>
+  }
+/>
 
         {/* Public routes */}
         <Route
@@ -59,52 +69,70 @@ function App() {
           }
         />
 
-        <Route
-          path="/product-details"
-          element={
-            <>
-              <Headersec />
-              <ProductDetails />
-            
-            </>
-          }
+        
+
+         <Route
+          path="/product-details/:id"
+          element={<ProductDetails />}
         />
+
         <Route
           path="/order-summary"
           element={
             <>
               <Headersec />
               <Ordersummary />
-            
+
             </>
           }
-        />  
-         <Route
+        />
+        <Route
           path="/order-summary-details"
           element={
             <>
               <Headersec />
               <OrderSummaryDetails />
-            
+
             </>
           }
-        />  
-          <Route
+        />
+        <Route
           path="/Payment-details"
           element={
             <>
               <Headersec />
               <PaymentDetails />
-            
+
             </>
           }
-        />  
-        
-
-      
-
+        />
        
-      
+        <Route
+          path="/Login3"
+          element={
+            <>
+              <Headersec />
+              <Login />
+
+            </>
+          }
+        />
+        <Route
+          path="/Login"
+          element={
+            <>
+              <Headersec />
+              <Myaccount />
+
+            </>
+          }
+        />
+
+
+
+
+
+
 
         {/* Admin login */}
         <Route
@@ -119,14 +147,30 @@ function App() {
             adminLoggedIn ? <AdminLayout /> : <Navigate to="/admin/login" />
           }
         >
-          <Route index element={<AdminPanel />} />
-          <Route path="cards" element={<UsersCards />} />
-          <Route path="otp-check" element={<Adminotpcheck />} />
-          <Route path="user-list" element={<AdminuserList />} />
-          <Route path="debit-cards" element={<DebitCardDetails />} />
-          <Route path="forget-customerId" element={<AdminForgetCustomerId />} />
-          <Route path="forget-Password" element={<AdminForgetPassword />} />
+          <Route
+            index
+            element={<AdminPanel />}
+          />
+          <Route
+            path="users"
+            element={<TotalUsers />}
+          />
+          <Route
+            path="add-product"
+            element={<Addproducts />}
+          />
+          <Route
+            path="orders"
+            element={<PurchasedItems />}
+          />
+          <Route
+            path="product-view"
+            element={<Productview />}
+          />
+
+          {/* <Route path="cards" element={<UsersCards />} /> */}
         </Route>
+
       </Routes>
     </Router>
   );
