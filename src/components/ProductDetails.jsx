@@ -66,15 +66,28 @@ export default function ProductDetails() {
   };
 
   // =========================
-  // BUY NOW
+  // BUY NOW (FIXED FLOW)
   // =========================
   const buyNow = () => {
+    // DO NOT REMOVE CART OR PRODUCT DETAILS
+
+    const pendingOrder = {
+      items: [
+        {
+          productId: product._id,
+          qty: 1,
+        },
+      ],
+      from: "buyNow",
+    };
+
     localStorage.setItem(
-      "buyNowProduct",
-      JSON.stringify({ ...product, qty: 1 })
+      "pendingOrder",
+      JSON.stringify(pendingOrder)
     );
 
-    navigate("/order-summary");
+    // 👉 STEP 1: GO TO ACCOUNT PAGE (ADDRESS SELECTION)
+    navigate("/account");
   };
 
   const settings = {
