@@ -406,7 +406,7 @@ const handleLogout = () => {
       <div className="mt-2">
 
         <img
-          src="/bannerdown.webp"
+          src="/sliderflip.jpg"
           alt="banner"
           className="w-full"
         />
