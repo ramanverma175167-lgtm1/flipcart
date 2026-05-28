@@ -1,230 +1,225 @@
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function PaymentPage() {
-    const [selectedMethod, setSelectedMethod] = useState("qr");
+  const navigate = useNavigate();
 
+  const [selectedMethod, setSelectedMethod] = useState("qr");
+  const [address, setAddress] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ================= LOGIN CHECK =================
+  useEffect(() => {
+    const user = localStorage.getItem("loggedInUser");
+
+    if (!user) {
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
+
+  // ================= LOAD DATA =================
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // ADDRESS
+        const savedAddress = JSON.parse(
+          localStorage.getItem("deliveryAddress")
+        );
+
+        setAddress(savedAddress);
+
+        // CART
+        const savedCart =
+          JSON.parse(localStorage.getItem("cart")) || [];
+
+        console.log("CART FROM LOCALSTORAGE:", savedCart);
+
+        // EMPTY CART CHECK
+        if (savedCart.length === 0) {
+          setCartItems([]);
+          setLoading(false);
+          return;
+        }
+
+        // FETCH PRODUCTS
+        const res = await fetch(
+          "https://flipcart-1-audl.onrender.com/api/products"
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          // FIXED: productId matching
+          const updatedCart = savedCart
+            .map((cartItem) => {
+              const product = data.products.find(
+                (p) => p._id === cartItem.productId
+              );
+
+              if (!product) return null;
+
+              return {
+                ...product,
+                qty: cartItem.qty || 1,
+              };
+            })
+            .filter(Boolean);
+
+          setCartItems(updatedCart);
+        }
+      } catch (error) {
+        console.log("PAYMENT PAGE ERROR:", error);
+      }
+
+      setLoading(false);
+    };
+
+    loadData();
+  }, []);
+
+  // ================= TOTALS =================
+  const totalOldPrice = cartItems.reduce(
+    (total, item) =>
+      total +
+      Number(item.oldPrice || item.price || 0) *
+        Number(item.qty || 1),
+    0
+  );
+
+  const totalPrice = cartItems.reduce(
+    (total, item) =>
+      total + Number(item.price || 0) * Number(item.qty || 1),
+    0
+  );
+
+  const totalDiscount = totalOldPrice - totalPrice;
+
+  // ================= PAYMENT =================
+ const handlePayment = () => {
+  const orderData = {
+    items: cartItems,
+    address,
+    total: totalPrice,
+    paymentMethod: selectedMethod,
+    orderDate: new Date(),
+  };
+
+  // SAVE TEMP ORDER (NOT FINAL YET)
+  localStorage.setItem(
+    "pendingOrder",
+    JSON.stringify(orderData)
+  );
+
+  // GO TO GATEWAY PAGE
+  navigate("/gateway");
+};
+
+  // ================= LOADING =================
+  if (loading) {
     return (
-        <div className="min-h-screen bg-[#f1f3f6] p-2 sm:p-4">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-                {/* LEFT SECTION */}
-                <div className="lg:col-span-2 flex flex-col gap-4">
-
-                    {/* TOP STEPS */}
-                    <div className="bg-white p-4 shadow-sm">
-                        <div className="flex items-center justify-between">
-
-                            {/* ADDRESS */}
-                            <div className="flex flex-col items-center flex-1">
-                                <div className="w-8 h-8 rounded-full bg-green-600 text-white text-sm font-bold flex items-center justify-center">
-                                    ✓
-                                </div>
-
-                                <p className="text-xs font-semibold text-green-600 mt-1">
-                                    Address
-                                </p>
-                            </div>
-
-                            <div className="flex-1 h-[2px] bg-green-500 mx-1"></div>
-
-                            {/* ORDER SUMMARY */}
-                            <div className="flex flex-col items-center flex-1">
-                                <div className="w-8 h-8 rounded-full bg-green-600 text-white text-sm font-bold flex items-center justify-center">
-                                    ✓
-                                </div>
-
-                                <p className="text-xs font-semibold text-green-600 mt-1">
-                                    Order Summary
-                                </p>
-                            </div>
-
-                            <div className="flex-1 h-[2px] bg-green-500 mx-1"></div>
-
-                            {/* PAYMENT */}
-                            <div className="flex flex-col items-center flex-1">
-                                <div className="w-8 h-8 rounded-full bg-[#2874f0] text-white text-sm font-bold flex items-center justify-center">
-                                    3
-                                </div>
-
-                                <p className="text-xs font-semibold text-[#2874f0] mt-1">
-                                    Payment
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* PAYMENT METHODS */}
-                    <div className="bg-white shadow-sm overflow-hidden">
-
-                        {/* QR OPTION */}
-                        <div
-                            onClick={() => setSelectedMethod("qr")}
-                            className={`border-b cursor-pointer transition-all ${selectedMethod === "qr"
-                                    ? "border-l-4 border-l-[#2874f0] bg-blue-50"
-                                    : "border-gray-200"
-                                }`}
-                        >
-                            <div className="p-4 flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-sm font-semibold text-gray-800">
-                                        Pay Using QR Code
-                                    </h2>
-
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Scan QR with any UPI App
-                                    </p>
-                                </div>
-
-                                <input
-                                    type="radio"
-                                    checked={selectedMethod === "qr"}
-                                    readOnly
-                                />
-                            </div>
-
-                            {selectedMethod === "qr" && (
-                                <div className="px-4 pb-5 flex flex-col items-center">
-                                    <div className="w-52 h-52 border border-gray-200 p-2 bg-white">
-                                        <img
-                                            src="/qrcode.avif"
-                                            alt="QR Code"
-                                            className="w-full h-full object-contain"
-                                        />
-                                    </div>
-
-                                    <p className="text-xs text-gray-600 mt-3 text-center leading-5">
-                                        Open any UPI app like PhonePe, Google Pay,
-                                        Paytm or BHIM and scan this QR code.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* BANK OPTION */}
-                        <div
-                            onClick={() => setSelectedMethod("bank")}
-                            className={`cursor-pointer transition-all ${selectedMethod === "bank"
-                                    ? "border-l-4 border-l-[#2874f0] bg-blue-50"
-                                    : ""
-                                }`}
-                        >
-                            <div className="p-4 flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-sm font-semibold text-gray-800">
-                                        Bank Account Transfer
-                                    </h2>
-
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Transfer amount directly to bank account
-                                    </p>
-                                </div>
-
-                                <input
-                                    type="radio"
-                                    checked={selectedMethod === "bank"}
-                                    readOnly
-                                />
-                            </div>
-
-                            {selectedMethod === "bank" && (
-                                <div className="px-4 pb-5">
-                                    <div className="border border-gray-200 bg-white p-4 text-sm text-gray-700 space-y-3">
-
-                                        <div className="flex justify-between gap-4">
-                                            <span className="font-medium text-gray-500">
-                                                Bank Name
-                                            </span>
-
-                                            <span className="text-right font-semibold">
-                                                State Bank of India
-                                            </span>
-                                        </div>
-
-                                        <div className="flex justify-between gap-4">
-                                            <span className="font-medium text-gray-500">
-                                                Account Holder
-                                            </span>
-
-                                            <span className="text-right font-semibold">
-                                                Mukesh Singh
-                                            </span>
-                                        </div>
-
-                                        <div className="flex justify-between gap-4">
-                                            <span className="font-medium text-gray-500">
-                                                Account Number
-                                            </span>
-
-                                            <span className="text-right font-semibold">
-                                                123456789012
-                                            </span>
-                                        </div>
-
-                                        <div className="flex justify-between gap-4">
-                                            <span className="font-medium text-gray-500">
-                                                IFSC Code
-                                            </span>
-
-                                            <span className="text-right font-semibold">
-                                                SBIN0001234
-                                            </span>
-                                        </div>
-
-                                        <div className="flex justify-between gap-4">
-                                            <span className="font-medium text-gray-500">
-                                                Branch
-                                            </span>
-
-                                            <span className="text-right font-semibold">
-                                                New Delhi Main Branch
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* RIGHT SECTION */}
-                <div>
-                    <div className="bg-white shadow-sm p-4 sticky top-3">
-
-                        <h2 className="text-sm font-bold text-gray-500 border-b border-gray-200 pb-3 uppercase">
-                            Payment Details
-                        </h2>
-
-                        <div className="flex items-center justify-between mt-4 text-sm">
-                            <span>Product Price</span>
-                            <span>₹52,000</span>
-                        </div>
-
-                        <div className="flex items-center justify-between mt-3 text-sm">
-                            <span>Discount</span>
-                            <span className="text-green-600">- ₹10,000</span>
-                        </div>
-
-                        <div className="flex items-center justify-between mt-3 text-sm">
-                            <span>Delivery Charges</span>
-                            <span className="text-green-600">FREE</span>
-                        </div>
-
-                        <div className="border-t border-dashed border-gray-300 mt-4 pt-4 flex items-center justify-between font-bold text-base">
-                            <span>Total Payable</span>
-                            <span>₹42,000</span>
-                        </div>
-
-                        <button className="w-full h-11 bg-[#fb641b] text-white font-semibold mt-5 active:scale-[0.98] transition-all">
-                            Confirm Payment
-                        </button>
-
-                        <p className="text-[11px] text-gray-500 text-center mt-3 leading-5">
-                            Your payment information is secure and encrypted.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="min-h-screen bg-[#f1f3f6] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
     );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f1f3f6] p-2 sm:p-4">
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        {/* LEFT */}
+        <div className="lg:col-span-2 flex flex-col gap-4">
+
+          {/* STEPS */}
+          <div className="bg-white p-4 shadow-sm rounded-lg">
+            <div className="flex justify-between">
+
+              <div className="text-green-600 text-sm font-bold">✓ Address</div>
+              <div className="text-green-600 text-sm font-bold">✓ Order</div>
+              <div className="text-blue-600 text-sm font-bold">Payment</div>
+
+            </div>
+          </div>
+
+          {/* ADDRESS */}
+          {address && (
+            <div className="bg-white p-4 rounded-xl shadow-sm">
+              <h2 className="font-bold text-sm mb-2">Delivery Address</h2>
+              <p>{address.name}</p>
+              <p>{address.house}, {address.colony}</p>
+              <p>{address.city}, {address.state} - {address.pincode}</p>
+              <p>📞 {address.mobile}</p>
+            </div>
+          )}
+
+          {/* CART ITEMS */}
+          <div className="flex flex-col gap-3">
+
+            {cartItems.length === 0 ? (
+              <div className="bg-white p-5 text-center rounded-xl text-gray-500">
+                No products found in cart
+              </div>
+            ) : (
+              cartItems.map((item) => (
+                <div key={item._id} className="bg-white p-4 rounded-xl shadow-sm flex gap-4">
+
+                  <img
+                    src={item.images?.[0] || "/noimage.png"}
+                    className="w-28 h-28 object-contain"
+                    alt=""
+                  />
+
+                  <div>
+                    <h2 className="font-semibold">{item.title}</h2>
+                    <p className="text-sm text-gray-500">Qty: {item.qty}</p>
+                    <p className="font-bold">₹{item.price * item.qty}</p>
+                  </div>
+
+                </div>
+              ))
+            )}
+
+          </div>
+
+        </div>
+
+        {/* RIGHT */}
+        <div className="bg-white p-4 rounded-xl shadow-sm">
+
+          <h2 className="font-bold border-b pb-2">Payment Details</h2>
+
+          <div className="flex justify-between mt-3 text-sm">
+            <span>Price</span>
+            <span>₹{totalOldPrice}</span>
+          </div>
+
+          <div className="flex justify-between text-sm mt-2">
+            <span>Discount</span>
+            <span className="text-green-600">- ₹{totalDiscount}</span>
+          </div>
+
+          <div className="flex justify-between text-sm mt-2">
+            <span>Delivery</span>
+            <span className="text-green-600">FREE</span>
+          </div>
+
+          <div className="border-t mt-3 pt-3 font-bold flex justify-between">
+            <span>Total</span>
+            <span>₹{totalPrice}</span>
+          </div>
+
+          <button
+            onClick={handlePayment}
+            className="w-full bg-orange-500 text-white py-2 mt-4 rounded-md"
+          >
+            Confirm Payment
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+  );
 }

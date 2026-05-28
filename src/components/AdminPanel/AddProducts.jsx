@@ -74,7 +74,7 @@ const handleSubmit = async (e) => {
   });
 
   try {
-    const res = await fetch("http://localhost:5000/api/products/add", {
+    const res = await fetch("https://flipcart-1-audl.onrender.com/api/products/add", {
       method: "POST",
       body: formData, // ❗ NO HEADERS
     });

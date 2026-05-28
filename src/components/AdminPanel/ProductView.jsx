@@ -22,7 +22,7 @@ export default function ProductView() {
 
   // FETCH
   const fetchProducts = async () => {
-    const res = await fetch("http://localhost:5000/api/products");
+    const res = await fetch("https://flipcart-1-audl.onrender.com/api/products");
     const data = await res.json();
     setProducts(data.products || []);
   };
@@ -33,7 +33,7 @@ export default function ProductView() {
 
   // DELETE
   const deleteProduct = async (id) => {
-    await fetch(`http://localhost:5000/api/products/${id}`, {
+    await fetch(`https://flipcart-1-audl.onrender.com/api/products/${id}`, {
       method: "DELETE",
     });
 
@@ -77,7 +77,7 @@ export default function ProductView() {
     });
 
     const res = await fetch(
-      `http://localhost:5000/api/products/${editing._id}`,
+      `https://flipcart-1-audl.onrender.com/api/products/${editing._id}`,
       {
         method: "PUT",
         body: formData,
