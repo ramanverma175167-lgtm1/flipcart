@@ -14,6 +14,9 @@ export default function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ NEW MESSAGE STATE
+  const [message, setMessage] = useState("");
+
   // =========================
   // FETCH PRODUCT
   // =========================
@@ -63,14 +66,20 @@ export default function ProductDetails() {
 
     // update header/cart count
     window.dispatchEvent(new Event("cartUpdated"));
+
+    // ✅ SHOW MESSAGE
+    setMessage("Product added to cart ✔");
+
+    // auto hide after 2 seconds
+    setTimeout(() => {
+      setMessage("");
+    }, 2000);
   };
 
   // =========================
   // BUY NOW (FIXED FLOW)
   // =========================
   const buyNow = () => {
-    // DO NOT REMOVE CART OR PRODUCT DETAILS
-
     const pendingOrder = {
       items: [
         {
@@ -86,7 +95,6 @@ export default function ProductDetails() {
       JSON.stringify(pendingOrder)
     );
 
-    // 👉 STEP 1: GO TO ACCOUNT PAGE (ADDRESS SELECTION)
     navigate("/account");
   };
 
@@ -120,16 +128,19 @@ export default function ProductDetails() {
   return (
     <div className="product-page">
 
+      {/* ✅ MESSAGE BOX */}
+      {message && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
+          {message}
+        </div>
+      )}
+
       {/* IMAGE SLIDER */}
       <div className="slider-wrapper">
         <Slider {...settings}>
           {product.images?.map((img, index) => (
             <div key={index}>
-              <img
-                src={img}
-                alt="product"
-                className="slider-image"
-              />
+              <img src={img} alt="product" className="slider-image" />
             </div>
           ))}
         </Slider>
