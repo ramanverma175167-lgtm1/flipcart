@@ -295,23 +295,7 @@ const handleLogout = () => {
       {/* ================= HEADER ================= */}
       <header className="sticky top-0 z-30 bg-[#2874f0] shadow-md">
         {/* USER STATUS */}
-<div className="bg-black text-white text-xs px-3 py-1 flex justify-between">
 
-  <span>
-    User:
-    {" "}
-    {loggedInUser
-      ? loggedInUser.name
-      : "Not Logged In"}
-  </span>
-
-  <span>
-    {loggedInUser
-      ? loggedInUser.email
-      : ""}
-  </span>
-
-</div>
 
         <div className="flex items-center justify-between px-3 py-2">
 
